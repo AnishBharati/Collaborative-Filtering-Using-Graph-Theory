@@ -3,23 +3,33 @@ import { graph, itemValues } from "../data/sampleData";
 
 function Node2Vec({ userId, numWalks = 10, walkLength = 5 }) {
   const [result, setResult] = useState(null);
+  const [uniqueItemValues, setUniqueItemValues] = useState([]); // To store unique item values
 
   const generateRandomWalks = (graph, userId, walkLength, numWalks) => {
     const walks = [];
     const seenPaths = new Set(); // To track unique paths
+    const allItemValues = new Set(); // To track unique item values across all walks
 
     for (let i = 0; i < numWalks; i++) {
       let walk = [userId];
+      let currentItemValues = new Set(); // To track item values for the current walk
+
       for (let j = 0; j < walkLength - 1; j++) {
         const current = walk[walk.length - 1];
         const next =
           graph[current] ? graph[current][Math.floor(Math.random() * graph[current].length)] : null;
         if (next) {
           walk.push(next);
+          if (next.startsWith("item") && !currentItemValues.has(next)) {
+            // Add item value if not already added for this walk
+            allItemValues.add(itemValues[next] || "No value");
+            currentItemValues.add(next);
+          }
         } else {
           break;
         }
       }
+
       // Convert path to string for easy comparison and add it if not seen before
       const walkString = walk.join("->");
       if (!seenPaths.has(walkString)) {
@@ -28,23 +38,29 @@ function Node2Vec({ userId, numWalks = 10, walkLength = 5 }) {
       }
     }
 
-    return walks;
+    // Convert allItemValues to an array and return the walks and unique item values
+    return { walks, uniqueItemValues: Array.from(allItemValues) };
   };
 
   const handleRun = () => {
-    const walks = generateRandomWalks(graph, userId, walkLength, numWalks);
-    const pathWithValues = walks.map((walk) => {
-      return walk.map((node) => {
-        if (node.startsWith("item")) {
-          return {
-            node: node,
-            value: itemValues[node] || "No value"
-          };
-        }
-        return node;
-      });
+    const { walks, uniqueItemValues } = generateRandomWalks(graph, userId, walkLength, numWalks);
+    const pathWithValues = walks.map((walk, index) => {
+      return (
+        <div key={index} className="mb-4">
+          <h4 className="text-xl font-medium text-gray-700">Walk {index + 1}:</h4>
+          <ul className="space-y-2 mt-2">
+            {walk.map((node, idx) => (
+              <li key={idx} className="flex justify-between items-center">
+                <span className="text-gray-600">{node}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
     });
+
     setResult(pathWithValues);
+    setUniqueItemValues(uniqueItemValues); // Set the unique item values
   };
 
   return (
@@ -55,28 +71,20 @@ function Node2Vec({ userId, numWalks = 10, walkLength = 5 }) {
       >
         Run Node2Vec
       </button>
-      
+
       <h3 className="mt-6 text-2xl font-semibold text-gray-800">Node2Vec Results:</h3>
-      
+
       <div className="mt-4 bg-gray-50 p-4 rounded-md">
         {result && result.length > 0 ? (
-          result.map((walk, index) => (
-            <div key={index} className="mb-4">
-              <h4 className="text-xl font-medium text-gray-700">Walk {index + 1}:</h4>
-              <ul className="space-y-2 mt-2">
-                {walk.map((node, idx) => (
-                  <li key={idx} className="flex justify-between items-center">
-                    <span className="text-gray-600">{node.node || node}</span>
-                    {node.value && (
-                      <span className="text-sm text-gray-500">
-                        (Value: {node.value})
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))
+          <>
+            {result}
+            {/* Display collected unique item values at the end of all walks */}
+            {uniqueItemValues.length > 0 && (
+              <div className="mt-4">
+                <strong>Collected Item Values:</strong> {uniqueItemValues.join(", ")}
+              </div>
+            )}
+          </>
         ) : (
           <p className="text-gray-500">No walks generated yet. Click the button to run.</p>
         )}

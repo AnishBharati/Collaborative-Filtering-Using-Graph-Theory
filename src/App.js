@@ -23,12 +23,13 @@ function App() {
             <option value="user2">User 2</option>
             <option value="user3">User 3</option>
             <option value="user4">User 4</option>
+            <option value="user5">User 5</option>
           </select>
         </div>
 
         <div className="space-y-8">
           <PersonalizedPageRank userId={userId} />
-          <CommunityDetection />
+          <CommunityDetection userId={userId}/>
           <Node2Vec userId={userId} />
           <GraphVisualization userId={userId} />
         </div>
