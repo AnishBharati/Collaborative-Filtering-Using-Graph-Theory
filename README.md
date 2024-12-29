@@ -9,23 +9,17 @@ A React-based implementation of collaborative filtering for generating item reco
 
 ## Installation
 
-1. Clone the repo:
-    ```bash
-    git clone https://github.com/yourusername/collaborative-filtering-react.git
-    cd collaborative-filtering-react
-    ```
-
-2. Install dependencies:
+1. Install dependencies:
     ```bash
     npm install
     ```
 
-3. Run the app:
+2. Run the app:
     ```bash
     npm start
     ```
 
-4. Visit `http://localhost:3000` in your browser.
+3. Visit `http://localhost:3000` in your browser.
 
 ## Usage
 
